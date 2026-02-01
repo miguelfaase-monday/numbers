@@ -9,6 +9,7 @@ Een professionele cijfer calculator voor Nederlandse docenten. Bereken snel en e
 ## Inhoudsopgave
 
 - [Features](#features)
+- [Quick Start](#quick-start)
 - [Vereisten](#vereisten)
 - [Installatie](#installatie)
   - [1. Node.js installeren](#1-nodejs-installeren)
@@ -18,10 +19,8 @@ Een professionele cijfer calculator voor Nederlandse docenten. Bereken snel en e
   - [Development mode (Web)](#development-mode-web)
   - [Development mode (Tauri Desktop)](#development-mode-tauri-desktop)
 - [Applicatie bouwen](#applicatie-bouwen)
-  - [Web build](#web-build)
-  - [Tauri Desktop build (macOS)](#tauri-desktop-build-macos)
-  - [Tauri Desktop build (Windows)](#tauri-desktop-build-windows)
-  - [Tauri Desktop build (Linux)](#tauri-desktop-build-linux)
+  - [GitHub Actions (Aanbevolen)](#github-actions-aanbevolen)
+  - [Lokale build](#lokale-build)
 - [Projectstructuur](#projectstructuur)
 - [Berekeningsmethoden](#berekeningsmethoden)
 - [Problemen oplossen](#problemen-oplossen)
@@ -44,6 +43,31 @@ Een professionele cijfer calculator voor Nederlandse docenten. Bereken snel en e
 - **Afdrukken:** Print-geoptimaliseerde weergave
 - **Persistentie:** Instellingen worden automatisch opgeslagen in localStorage
 - **Cross-platform:** Draait op macOS, Windows en Linux als native desktop app
+
+---
+
+## Quick Start
+
+### Web versie (snelste manier)
+
+```bash
+# Clone het project
+git clone https://github.com/[username]/numbers.git
+cd numbers
+
+# Installeer dependencies en start
+npm install
+npm run dev
+```
+
+Open **http://localhost:1420** in je browser.
+
+### Desktop versie downloaden
+
+Download de laatste release van de [Releases pagina](../../releases) voor jouw platform:
+- **macOS:** `.dmg` bestand
+- **Windows:** `.msi` of `.exe` installer
+- **Linux:** `.deb` of `.AppImage`
 
 ---
 
@@ -169,7 +193,42 @@ Dit compileert de Rust code en opent een native venster. De eerste keer duurt di
 
 ## Applicatie bouwen
 
-### Web build
+### GitHub Actions (Aanbevolen)
+
+De makkelijkste manier om de app te bouwen is via GitHub Actions. Dit bouwt automatisch voor alle platforms zonder lokale setup.
+
+#### Automatische builds
+
+Bij elke push naar `main` wordt de app automatisch gebouwd voor:
+- ✅ macOS (Apple Silicon - M1/M2/M3)
+- ✅ macOS (Intel x64)
+- ✅ Windows (x64)
+- ✅ Linux (x64)
+
+De build artifacts zijn te downloaden via de **Actions** tab in GitHub.
+
+#### Release maken
+
+Om een officiële release te maken met downloadbare installers:
+
+```bash
+# Tag een nieuwe versie
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+Dit triggert automatisch een build en maakt een draft release aan met alle installers.
+
+#### Handmatig triggeren
+
+Je kunt de build ook handmatig starten:
+1. Ga naar **Actions** tab in GitHub
+2. Selecteer **Build Tauri App**
+3. Klik **Run workflow**
+
+### Lokale build
+
+#### Web build
 
 Bouw een geoptimaliseerde versie voor web deployment:
 
@@ -177,48 +236,36 @@ Bouw een geoptimaliseerde versie voor web deployment:
 npm run build
 ```
 
-Output wordt gegenereerd in de `dist/` directory. Deze bestanden kunnen gehost worden op elke statische webserver.
+Output wordt gegenereerd in de `dist/` directory.
 
-### Tauri Desktop build (macOS)
+#### Tauri Desktop build (lokaal)
 
-#### Apple Silicon (M1/M2/M3)
+> ⚠️ **Let op:** Lokale Tauri builds vereisen Rust en platform-specifieke dependencies. GitHub Actions is eenvoudiger.
+
+**macOS (Apple Silicon):**
 ```bash
 npm run tauri build -- --target aarch64-apple-darwin
 ```
 
-#### Intel Mac
+**macOS (Intel):**
 ```bash
 npm run tauri build -- --target x86_64-apple-darwin
 ```
 
-#### Universal binary (beide architecturen)
-```bash
-npm run tauri build -- --target universal-apple-darwin
-```
-
-**Output locatie:** `src-tauri/target/release/bundle/`
-- `.app` - macOS Application bundle
-- `.dmg` - Disk image voor distributie
-
-### Tauri Desktop build (Windows)
-
+**Windows:**
 ```bash
 npm run tauri build -- --target x86_64-pc-windows-msvc
 ```
 
-**Output locatie:** `src-tauri/target/release/bundle/`
-- `.exe` - Windows executable
-- `.msi` - Windows installer
-
-### Tauri Desktop build (Linux)
-
+**Linux:**
 ```bash
 npm run tauri build -- --target x86_64-unknown-linux-gnu
 ```
 
-**Output locatie:** `src-tauri/target/release/bundle/`
-- `.deb` - Debian package
-- `.AppImage` - Portable Linux app
+**Output locaties:**
+- macOS: `src-tauri/target/[target]/release/bundle/dmg/*.dmg`
+- Windows: `src-tauri/target/[target]/release/bundle/msi/*.msi`
+- Linux: `src-tauri/target/[target]/release/bundle/deb/*.deb`
 
 ---
 
