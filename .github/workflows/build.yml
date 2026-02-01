@@ -76,7 +76,7 @@ jobs:
         run: npm ci
 
       - name: Generate app icons
-        run: node scripts/generate-icons.js
+        run: node scripts/generate-icons.cjs
 
       - name: Create macOS icns
         if: startsWith(matrix.platform, 'macos')
