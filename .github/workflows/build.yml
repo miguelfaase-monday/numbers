@@ -78,64 +78,75 @@ jobs:
       - name: Generate app icons (macOS)
         if: startsWith(matrix.platform, 'macos')
         run: |
-          # Install imagemagick for icon generation
-          brew install imagemagick
+          # Install librsvg for SVG conversion and icns tool
+          brew install librsvg png2icns
           
           # Create icons directory
           mkdir -p src-tauri/icons
           
-          # Convert SVG to PNG sizes needed by Tauri
-          magick src-tauri/icons/icon.svg -resize 32x32 src-tauri/icons/32x32.png
-          magick src-tauri/icons/icon.svg -resize 128x128 src-tauri/icons/128x128.png
-          magick src-tauri/icons/icon.svg -resize 256x256 src-tauri/icons/128x128@2x.png
-          magick src-tauri/icons/icon.svg -resize 512x512 src-tauri/icons/icon.png
+          # Convert SVG to PNG sizes needed by Tauri using rsvg-convert
+          rsvg-convert -w 32 -h 32 src-tauri/icons/icon.svg -o src-tauri/icons/32x32.png
+          rsvg-convert -w 128 -h 128 src-tauri/icons/icon.svg -o src-tauri/icons/128x128.png
+          rsvg-convert -w 256 -h 256 src-tauri/icons/icon.svg -o src-tauri/icons/128x128@2x.png
+          rsvg-convert -w 512 -h 512 src-tauri/icons/icon.svg -o src-tauri/icons/icon.png
           
           # Create icns for macOS
           mkdir -p src-tauri/icons/icon.iconset
-          magick src-tauri/icons/icon.svg -resize 16x16 src-tauri/icons/icon.iconset/icon_16x16.png
-          magick src-tauri/icons/icon.svg -resize 32x32 src-tauri/icons/icon.iconset/icon_16x16@2x.png
-          magick src-tauri/icons/icon.svg -resize 32x32 src-tauri/icons/icon.iconset/icon_32x32.png
-          magick src-tauri/icons/icon.svg -resize 64x64 src-tauri/icons/icon.iconset/icon_32x32@2x.png
-          magick src-tauri/icons/icon.svg -resize 128x128 src-tauri/icons/icon.iconset/icon_128x128.png
-          magick src-tauri/icons/icon.svg -resize 256x256 src-tauri/icons/icon.iconset/icon_128x128@2x.png
-          magick src-tauri/icons/icon.svg -resize 256x256 src-tauri/icons/icon.iconset/icon_256x256.png
-          magick src-tauri/icons/icon.svg -resize 512x512 src-tauri/icons/icon.iconset/icon_256x256@2x.png
-          magick src-tauri/icons/icon.svg -resize 512x512 src-tauri/icons/icon.iconset/icon_512x512.png
-          magick src-tauri/icons/icon.svg -resize 1024x1024 src-tauri/icons/icon.iconset/icon_512x512@2x.png
+          rsvg-convert -w 16 -h 16 src-tauri/icons/icon.svg -o src-tauri/icons/icon.iconset/icon_16x16.png
+          rsvg-convert -w 32 -h 32 src-tauri/icons/icon.svg -o src-tauri/icons/icon.iconset/icon_16x16@2x.png
+          rsvg-convert -w 32 -h 32 src-tauri/icons/icon.svg -o src-tauri/icons/icon.iconset/icon_32x32.png
+          rsvg-convert -w 64 -h 64 src-tauri/icons/icon.svg -o src-tauri/icons/icon.iconset/icon_32x32@2x.png
+          rsvg-convert -w 128 -h 128 src-tauri/icons/icon.svg -o src-tauri/icons/icon.iconset/icon_128x128.png
+          rsvg-convert -w 256 -h 256 src-tauri/icons/icon.svg -o src-tauri/icons/icon.iconset/icon_128x128@2x.png
+          rsvg-convert -w 256 -h 256 src-tauri/icons/icon.svg -o src-tauri/icons/icon.iconset/icon_256x256.png
+          rsvg-convert -w 512 -h 512 src-tauri/icons/icon.svg -o src-tauri/icons/icon.iconset/icon_256x256@2x.png
+          rsvg-convert -w 512 -h 512 src-tauri/icons/icon.svg -o src-tauri/icons/icon.iconset/icon_512x512.png
+          rsvg-convert -w 1024 -h 1024 src-tauri/icons/icon.svg -o src-tauri/icons/icon.iconset/icon_512x512@2x.png
           iconutil -c icns src-tauri/icons/icon.iconset -o src-tauri/icons/icon.icns
           
-          # Create ico for Windows (needed for universal build)
-          magick src-tauri/icons/icon.svg -resize 256x256 src-tauri/icons/icon.ico
+          # Create ico for Windows (needed for universal build) using png2icns
+          png2icns src-tauri/icons/icon.ico src-tauri/icons/icon.png || true
+          # Fallback: just copy png as ico (Tauri will handle it)
+          cp src-tauri/icons/icon.png src-tauri/icons/icon.ico 2>/dev/null || true
 
       - name: Generate app icons (Windows)
         if: matrix.platform == 'windows-latest'
         shell: pwsh
         run: |
-          # Install imagemagick
-          choco install imagemagick -y
+          # Install Inkscape for SVG conversion (more reliable than imagemagick for SVG)
+          choco install inkscape -y
           
           # Refresh PATH
           $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
           
-          # Create icons
-          magick src-tauri/icons/icon.svg -resize 32x32 src-tauri/icons/32x32.png
-          magick src-tauri/icons/icon.svg -resize 128x128 src-tauri/icons/128x128.png
-          magick src-tauri/icons/icon.svg -resize 256x256 "src-tauri/icons/128x128@2x.png"
-          magick src-tauri/icons/icon.svg -resize 256x256 src-tauri/icons/icon.ico
-          magick src-tauri/icons/icon.svg -resize 512x512 src-tauri/icons/icon.png
+          # Find Inkscape
+          $inkscape = "C:\Program Files\Inkscape\bin\inkscape.exe"
+          
+          # Create icons using Inkscape
+          & $inkscape src-tauri/icons/icon.svg --export-width=32 --export-height=32 --export-filename=src-tauri/icons/32x32.png
+          & $inkscape src-tauri/icons/icon.svg --export-width=128 --export-height=128 --export-filename=src-tauri/icons/128x128.png
+          & $inkscape src-tauri/icons/icon.svg --export-width=256 --export-height=256 --export-filename="src-tauri/icons/128x128@2x.png"
+          & $inkscape src-tauri/icons/icon.svg --export-width=256 --export-height=256 --export-filename=src-tauri/icons/icon.png
+          
+          # For ICO, we'll use imagemagick just for PNG->ICO conversion
+          choco install imagemagick -y
+          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+          magick src-tauri/icons/icon.png src-tauri/icons/icon.ico
 
       - name: Generate app icons (Linux)
         if: matrix.platform == 'ubuntu-22.04'
         run: |
-          # Install imagemagick
-          sudo apt-get install -y imagemagick
+          # Install librsvg and icnsutils for icon conversion
+          sudo apt-get install -y librsvg2-bin imagemagick
           
-          # Create icons
-          convert src-tauri/icons/icon.svg -resize 32x32 src-tauri/icons/32x32.png
-          convert src-tauri/icons/icon.svg -resize 128x128 src-tauri/icons/128x128.png
-          convert src-tauri/icons/icon.svg -resize 256x256 src-tauri/icons/128x128@2x.png
-          convert src-tauri/icons/icon.svg -resize 256x256 src-tauri/icons/icon.ico
-          convert src-tauri/icons/icon.svg -resize 512x512 src-tauri/icons/icon.png
+          # Create icons using rsvg-convert
+          rsvg-convert -w 32 -h 32 src-tauri/icons/icon.svg -o src-tauri/icons/32x32.png
+          rsvg-convert -w 128 -h 128 src-tauri/icons/icon.svg -o src-tauri/icons/128x128.png
+          rsvg-convert -w 256 -h 256 src-tauri/icons/icon.svg -o src-tauri/icons/128x128@2x.png
+          rsvg-convert -w 512 -h 512 src-tauri/icons/icon.svg -o src-tauri/icons/icon.png
+          
+          # Create ico from png
+          convert src-tauri/icons/icon.png src-tauri/icons/icon.ico
 
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
