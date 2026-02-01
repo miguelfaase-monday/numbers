@@ -24,14 +24,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # macOS Apple Silicon
+          # macOS Universal (Intel + Apple Silicon)
           - platform: macos-latest
-            target: aarch64-apple-darwin
-            name: macOS-ARM64
-          # macOS Intel
-          - platform: macos-13
-            target: x86_64-apple-darwin
-            name: macOS-x64
+            target: universal-apple-darwin
+            name: macOS-Universal
           # Windows
           - platform: windows-latest
             target: x86_64-pc-windows-msvc
@@ -57,7 +53,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.target }}
+          targets: ${{ matrix.target == 'universal-apple-darwin' && 'aarch64-apple-darwin,x86_64-apple-darwin' || matrix.target }}
 
       - name: Install Linux dependencies
         if: matrix.platform == 'ubuntu-22.04'
@@ -79,6 +75,68 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci
 
+      - name: Generate app icons (macOS)
+        if: startsWith(matrix.platform, 'macos')
+        run: |
+          # Install imagemagick for icon generation
+          brew install imagemagick
+          
+          # Create icons directory
+          mkdir -p src-tauri/icons
+          
+          # Convert SVG to PNG sizes needed by Tauri
+          magick src-tauri/icons/icon.svg -resize 32x32 src-tauri/icons/32x32.png
+          magick src-tauri/icons/icon.svg -resize 128x128 src-tauri/icons/128x128.png
+          magick src-tauri/icons/icon.svg -resize 256x256 src-tauri/icons/128x128@2x.png
+          magick src-tauri/icons/icon.svg -resize 512x512 src-tauri/icons/icon.png
+          
+          # Create icns for macOS
+          mkdir -p src-tauri/icons/icon.iconset
+          magick src-tauri/icons/icon.svg -resize 16x16 src-tauri/icons/icon.iconset/icon_16x16.png
+          magick src-tauri/icons/icon.svg -resize 32x32 src-tauri/icons/icon.iconset/icon_16x16@2x.png
+          magick src-tauri/icons/icon.svg -resize 32x32 src-tauri/icons/icon.iconset/icon_32x32.png
+          magick src-tauri/icons/icon.svg -resize 64x64 src-tauri/icons/icon.iconset/icon_32x32@2x.png
+          magick src-tauri/icons/icon.svg -resize 128x128 src-tauri/icons/icon.iconset/icon_128x128.png
+          magick src-tauri/icons/icon.svg -resize 256x256 src-tauri/icons/icon.iconset/icon_128x128@2x.png
+          magick src-tauri/icons/icon.svg -resize 256x256 src-tauri/icons/icon.iconset/icon_256x256.png
+          magick src-tauri/icons/icon.svg -resize 512x512 src-tauri/icons/icon.iconset/icon_256x256@2x.png
+          magick src-tauri/icons/icon.svg -resize 512x512 src-tauri/icons/icon.iconset/icon_512x512.png
+          magick src-tauri/icons/icon.svg -resize 1024x1024 src-tauri/icons/icon.iconset/icon_512x512@2x.png
+          iconutil -c icns src-tauri/icons/icon.iconset -o src-tauri/icons/icon.icns
+          
+          # Create ico for Windows (needed for universal build)
+          magick src-tauri/icons/icon.svg -resize 256x256 src-tauri/icons/icon.ico
+
+      - name: Generate app icons (Windows)
+        if: matrix.platform == 'windows-latest'
+        shell: pwsh
+        run: |
+          # Install imagemagick
+          choco install imagemagick -y
+          
+          # Refresh PATH
+          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+          
+          # Create icons
+          magick src-tauri/icons/icon.svg -resize 32x32 src-tauri/icons/32x32.png
+          magick src-tauri/icons/icon.svg -resize 128x128 src-tauri/icons/128x128.png
+          magick src-tauri/icons/icon.svg -resize 256x256 "src-tauri/icons/128x128@2x.png"
+          magick src-tauri/icons/icon.svg -resize 256x256 src-tauri/icons/icon.ico
+          magick src-tauri/icons/icon.svg -resize 512x512 src-tauri/icons/icon.png
+
+      - name: Generate app icons (Linux)
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          # Install imagemagick
+          sudo apt-get install -y imagemagick
+          
+          # Create icons
+          convert src-tauri/icons/icon.svg -resize 32x32 src-tauri/icons/32x32.png
+          convert src-tauri/icons/icon.svg -resize 128x128 src-tauri/icons/128x128.png
+          convert src-tauri/icons/icon.svg -resize 256x256 src-tauri/icons/128x128@2x.png
+          convert src-tauri/icons/icon.svg -resize 256x256 src-tauri/icons/icon.ico
+          convert src-tauri/icons/icon.svg -resize 512x512 src-tauri/icons/icon.png
+
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
@@ -92,8 +150,8 @@ jobs:
         with:
           name: Cijfers-${{ matrix.name }}
           path: |
-            src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
-            src-tauri/target/${{ matrix.target }}/release/bundle/macos/*.app
+            src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
+            src-tauri/target/universal-apple-darwin/release/bundle/macos/*.app
           if-no-files-found: error
 
       - name: Upload artifacts (Windows)
