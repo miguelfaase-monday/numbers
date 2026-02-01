@@ -70,7 +70,9 @@ jobs:
             libgtk-3-dev \
             libayatana-appindicator3-dev \
             librsvg2-dev \
-            patchelf
+            patchelf \
+            dpkg \
+            fakeroot
 
       - name: Install Node.js dependencies
         run: npm ci
@@ -83,12 +85,28 @@ jobs:
         run: |
           iconutil -c icns src-tauri/icons/icon.iconset -o src-tauri/icons/icon.icns
 
+      - name: Create placeholder icns (non-macOS)
+        if: "!startsWith(matrix.platform, 'macos')"
+        shell: bash
+        run: |
+          # Tauri expects icon.icns to exist - copy png as placeholder on non-macOS
+          cp src-tauri/icons/icon.png src-tauri/icons/icon.icns
+
+      - name: List generated icons
+        shell: bash
+        run: |
+          echo "Generated icons:"
+          ls -la src-tauri/icons/
+          echo "Iconset (if exists):"
+          ls -la src-tauri/icons/icon.iconset/ 2>/dev/null || echo "No iconset"
+
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUST_BACKTRACE: 1
         with:
-          args: --target ${{ matrix.target }}
+          args: --target ${{ matrix.target }} --verbose
 
       - name: Upload artifacts (macOS)
         if: startsWith(matrix.platform, 'macos')
