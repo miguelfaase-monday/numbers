@@ -7,6 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
+const pngToIco = require('png-to-ico');
 
 const ICONS_DIR = path.join(__dirname, '..', 'src-tauri', 'icons');
 const SVG_PATH = path.join(ICONS_DIR, 'icon.svg');
@@ -18,6 +19,9 @@ const SIZES = [
   { name: '128x128@2x.png', size: 256 },
   { name: 'icon.png', size: 512 },
 ];
+
+// ICO sizes (Windows requires multiple sizes in one ICO file)
+const ICO_SIZES = [16, 24, 32, 48, 64, 128, 256];
 
 // macOS iconset sizes
 const ICONSET_SIZES = [
@@ -54,13 +58,20 @@ async function generateIcons() {
     console.log(`  ✓ ${name} (${size}x${size})`);
   }
 
-  // Generate ICO for Windows (256x256 PNG works as ico with Tauri)
-  const icoPath = path.join(ICONS_DIR, 'icon.ico');
-  await sharp(svgBuffer)
-    .resize(256, 256)
-    .png()
-    .toFile(icoPath);
-  console.log('  ✓ icon.ico (256x256)');
+  // Generate ICO for Windows (proper multi-size ICO format)
+  console.log('  Generating Windows ICO...');
+  const icoPngs = [];
+  for (const size of ICO_SIZES) {
+    const pngBuffer = await sharp(svgBuffer)
+      .resize(size, size)
+      .png()
+      .toBuffer();
+    icoPngs.push(pngBuffer);
+  }
+  
+  const icoBuffer = await pngToIco(icoPngs);
+  fs.writeFileSync(path.join(ICONS_DIR, 'icon.ico'), icoBuffer);
+  console.log('  ✓ icon.ico (multi-size)');
 
   // Generate macOS iconset
   const iconsetDir = path.join(ICONS_DIR, 'icon.iconset');
