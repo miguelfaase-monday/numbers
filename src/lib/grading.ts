@@ -95,7 +95,7 @@ function calculateGoed(score: number, kFactor: number): number {
 }
 
 /**
- * Calculate grade using Fixed Cutoff (Punten Cesuur) method
+ * Calculate grade using Fixed Cutoff (Cesuur in punten) method
  * Similar to Percentage, but uses exact point value for 5.5
  */
 function calculateFixedCutoff(
@@ -219,7 +219,7 @@ export function getMethodDisplayName(method: GradingMethod): string {
     percentage: "Cesuur %",
     fouten: "Fouten per punt",
     goed: "Goed per punt",
-    "fixed-cutoff": "Punten Cesuur",
+    "fixed-cutoff": "Cesuur in punten",
   };
   return names[method];
 }
@@ -229,11 +229,11 @@ export function getMethodDisplayName(method: GradingMethod): string {
  */
 export function getMethodDescription(method: GradingMethod): string {
   const descriptions: Record<GradingMethod, string> = {
-    "n-term": "Cijfer = 9 × (Score / Totaal) + N",
-    percentage: "Lineaire schaal met cesuur percentage",
+    "n-term": "Standaardmethode met N-term",
+    percentage: "Non-lineaire schaal met cesuur (%)",
     fouten: "Cijfer = 10 - (Fouten / K)",
     goed: "Cijfer = 1 + (Score / K)",
-    "fixed-cutoff": "Lineaire schaal met vast puntenaantal voor voldoende",
+    "fixed-cutoff": "Non-lineaire schaal met vaste cesuur in punten",
   };
   return descriptions[method];
 }

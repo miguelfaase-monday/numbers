@@ -1,13 +1,15 @@
 {
-  "name": "cijfer-calculator",
+  "name": "nummers",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name=nummers",
+    "deploy:preview": "npm run build && wrangler pages deploy dist --project-name=nummers --branch=preview"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.0.2",
@@ -20,12 +22,15 @@
     "@tauri-apps/api": "^1.5.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.4",
     "lucide-react": "^0.312.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "recharts": "^2.12.0",
     "tailwind-merge": "^2.2.1",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.5.9",

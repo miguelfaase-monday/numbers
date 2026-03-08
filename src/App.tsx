@@ -9,7 +9,7 @@ import { GradingConfig, DEFAULT_CONFIG } from "@/lib/grading";
 
 function App() {
   const [config, setConfig] = useLocalStorage<GradingConfig>(
-    "cijfer-calculator-config",
+    "nummers-config",
     DEFAULT_CONFIG
   );
 
@@ -21,50 +21,54 @@ function App() {
   );
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
-      {/* Top Bar */}
-      <header className="flex-shrink-0 h-14 bg-card border-b border-border flex items-center px-6 gap-4 no-print">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-sm">
-            <Calculator className="w-4 h-4 text-primary-foreground" />
-          </div>
-          <div>
-            <h1 className="text-sm font-semibold text-foreground leading-tight">
-              Cijfers
-            </h1>
-            <p className="text-[10px] text-muted-foreground leading-tight">
-              Bereken cijfers voor een toets.
-            </p>
+    <div className="min-h-screen flex flex-col bg-background overflow-x-hidden">
+      <header className="sticky top-0 z-30 bg-card/95 border-b border-border/80 px-4 lg:px-6 py-3 no-print backdrop-blur">
+        <div className="max-w-[1440px] mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary via-primary to-primary/60 flex items-center justify-center shadow-soft">
+              <Calculator className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="text-sm font-semibold text-foreground leading-tight tracking-wide">
+                Nummers
+              </h1>
+              <p className="text-[11px] text-muted-foreground leading-tight">
+                Toetsnormering
+              </p>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar */}
+      <div className="flex-1 max-w-[1440px] w-full mx-auto px-4 lg:px-6 py-6">
+        <div className="flex flex-col lg:flex-row items-start gap-6">
         <Sidebar config={config} onConfigChange={handleConfigChange} />
 
-        {/* Main Area */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-6 space-y-6 max-w-5xl mx-auto">
-            {/* Quick Lookup */}
+          <main className="flex-1 w-full space-y-6">
             <QuickLookup config={config} />
 
-            {/* Chart & Table Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <GradeChart config={config} />
-              <div className="lg:col-span-2">
-                <GradeTable config={config} />
+            <section className="space-y-3">
+              <div>
+                <h2 className="text-sm font-semibold text-foreground">Inzicht</h2>
+                <p className="text-xs text-muted-foreground">
+                  Zie direct hoe de normering verloopt en waar de voldoendegrens ligt.
+                </p>
               </div>
-            </div>
-          </div>
-        </main>
-      </div>
+              <GradeChart config={config} />
+            </section>
 
-      {/* Footer */}
-      <footer className="flex-shrink-0 h-10 bg-card border-t border-border flex items-center justify-center text-xs text-muted-foreground no-print">
-        <span> </span>
-      </footer>
+            <section className="space-y-3">
+              <div>
+                <h2 className="text-sm font-semibold text-foreground">Volledige referentie</h2>
+                <p className="text-xs text-muted-foreground">
+                  Controleer alle punten, fouten en cijfers in een volledig overzicht.
+                </p>
+              </div>
+              <GradeTable config={config} />
+            </section>
+          </main>
+        </div>
+      </div>
     </div>
   );
 }

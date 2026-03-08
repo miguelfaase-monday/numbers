@@ -49,18 +49,19 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["SF Pro Display", "Inter", "system-ui", "sans-serif"],
+        sans: ["Inter", "SF Pro Display", "system-ui", "sans-serif"],
         mono: ["SF Mono", "Menlo", "monospace"],
       },
       boxShadow: {
-        soft: "0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 4px 16px -4px rgba(0, 0, 0, 0.06)",
-        card: "0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.06)",
-        elevated: "0 8px 32px -8px rgba(0, 0, 0, 0.12), 0 2px 8px -2px rgba(0, 0, 0, 0.08)",
+        soft: "0 10px 26px -14px rgba(2, 6, 23, 0.9), 0 4px 10px rgba(2, 6, 23, 0.45)",
+        card: "0 14px 30px -18px rgba(2, 6, 23, 0.95), 0 2px 14px rgba(2, 6, 23, 0.55)",
+        elevated: "0 24px 48px -20px rgba(2, 6, 23, 0.95), 0 8px 16px rgba(2, 6, 23, 0.55)",
       },
       animation: {
         "fade-in": "fadeIn 0.3s ease-out",
         "slide-up": "slideUp 0.4s ease-out",
         "scale-in": "scaleIn 0.2s ease-out",
+        "pulse-soft": "pulseSoft 1.6s ease-in-out infinite",
       },
       keyframes: {
         fadeIn: {
@@ -74,6 +75,10 @@ export default {
         scaleIn: {
           "0%": { opacity: "0", transform: "scale(0.95)" },
           "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        pulseSoft: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.85" },
         },
       },
     },

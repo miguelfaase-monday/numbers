@@ -20,15 +20,15 @@ export function GradeChart({ config }: GradeChartProps) {
   const chartData = useMemo(() => generateChartData(config), [config]);
 
   return (
-    <div className="bg-card rounded-2xl shadow-card p-6 no-print animate-slide-up">
+    <div className="bg-card rounded-2xl border border-border/80 shadow-card p-6 no-print animate-slide-up transition-all duration-300 hover:shadow-elevated hover:border-primary/35">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-accent/15 flex items-center justify-center">
           <TrendingUp className="w-5 h-5 text-accent" />
         </div>
         <div>
-          <h3 className="font-semibold text-foreground">Cijfercurve</h3>
+          <h3 className="font-semibold text-foreground">Van punten naar cijfer</h3>
           <p className="text-xs text-muted-foreground">
-            Visuele weergave van de punten-cijfer relatie
+            Laat zien welk cijfer bij elk puntenaantal hoort.
           </p>
         </div>
       </div>
@@ -83,14 +83,13 @@ export function GradeChart({ config }: GradeChartProps) {
                 backgroundColor: "hsl(var(--card))",
                 border: "1px solid hsl(var(--border))",
                 borderRadius: "12px",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
                 fontSize: "13px",
               }}
               labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
               formatter={(value: number) => [value.toFixed(2), "Cijfer"]}
               labelFormatter={(label) => `${label} punten`}
             />
-            {/* Voldoende line */}
             <ReferenceLine
               y={config.voldoende}
               stroke="hsl(var(--passing-foreground))"
@@ -103,7 +102,6 @@ export function GradeChart({ config }: GradeChartProps) {
                 fontSize: 11,
               }}
             />
-            {/* Grade curve */}
             <Line
               type="monotone"
               dataKey="cijfer"

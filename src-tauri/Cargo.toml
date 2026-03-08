@@ -1,7 +1,7 @@
 [package]
 name = "cijfer-calculator"
-version = "1.0.0"
-description = "De Ultieme Cijfer Calculator voor Nederlandse Docenten"
+version = "1.1.0"
+description = "Nummers desktop grading and normering tool"
 authors = ["you"]
 license = ""
 repository = ""

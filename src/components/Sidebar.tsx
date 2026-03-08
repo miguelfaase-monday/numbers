@@ -31,6 +31,14 @@ const methodIcons: Record<GradingMethod, React.ReactNode> = {
   "fixed-cutoff": <Target className="w-4 h-4" />,
 };
 
+const methodTypeLabel: Record<GradingMethod, string> = {
+  "n-term": "Type: standaard",
+  percentage: "Type: non-lineair",
+  fouten: "Type: per punt",
+  goed: "Type: per punt",
+  "fixed-cutoff": "Type: non-lineair",
+};
+
 export function Sidebar({ config, onConfigChange }: SidebarProps) {
   const handleNumberInput = (
     field: keyof GradingConfig,
@@ -48,24 +56,22 @@ export function Sidebar({ config, onConfigChange }: SidebarProps) {
   };
 
   return (
-    <aside className="w-80 flex-shrink-0 bg-card border-r border-border h-full overflow-y-auto no-print">
+    <aside className="w-full lg:w-80 lg:flex-shrink-0 bg-card/75 border border-border/80 rounded-2xl no-print">
       <div className="p-6 space-y-6">
-        {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
             <Settings2 className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h2 className="font-semibold text-foreground">Instellingen</h2>
-            <p className="text-xs text-muted-foreground">Configureer de berekening</p>
+            <h2 className="font-semibold text-foreground">Normering</h2>
+            <p className="text-xs text-muted-foreground">Stel in hoe punten worden omgerekend naar cijfers.</p>
           </div>
         </div>
 
-        {/* Basic Settings */}
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="totalPoints" className="text-xs uppercase tracking-wide text-muted-foreground">
-              Totaal punten
+              Maximaal aantal punten
             </Label>
             <Input
               id="totalPoints"
@@ -80,7 +86,7 @@ export function Sidebar({ config, onConfigChange }: SidebarProps) {
 
           <div className="space-y-2">
             <Label htmlFor="voldoende" className="text-xs uppercase tracking-wide text-muted-foreground">
-              Voldoende (ondergrens)
+              Grens voor voldoende
             </Label>
             <Input
               id="voldoende"
@@ -95,13 +101,11 @@ export function Sidebar({ config, onConfigChange }: SidebarProps) {
           </div>
         </div>
 
-        {/* Divider */}
         <div className="h-px bg-border" />
 
-        {/* Method Picker */}
         <div className="space-y-3">
           <Label className="text-xs uppercase tracking-wide text-muted-foreground">
-            Berekeningsmethode
+            Normeringsmethode
           </Label>
 
           <Tabs
@@ -109,31 +113,32 @@ export function Sidebar({ config, onConfigChange }: SidebarProps) {
             onValueChange={(value) => onConfigChange({ method: value as GradingMethod })}
           >
             <TabsList className="grid grid-cols-2 gap-1 h-auto">
-              <TabsTrigger value="n-term" className="flex items-center gap-1.5 text-xs py-2">
+              <TabsTrigger value="n-term" className="flex items-center gap-1.5 text-[13px] py-2.5">
                 {methodIcons["n-term"]}
                 <span>N-term</span>
               </TabsTrigger>
-              <TabsTrigger value="percentage" className="flex items-center gap-1.5 text-xs py-2">
+              <TabsTrigger value="percentage" className="flex items-center gap-1.5 text-[13px] py-2.5">
                 {methodIcons.percentage}
                 <span>Cesuur %</span>
               </TabsTrigger>
-              <TabsTrigger value="fouten" className="flex items-center gap-1.5 text-xs py-2">
+              <TabsTrigger value="fouten" className="flex items-center gap-1.5 text-[13px] py-2.5">
                 {methodIcons.fouten}
-                <span>Fouten/pt</span>
+                <span>Fouten per punt</span>
               </TabsTrigger>
-              <TabsTrigger value="goed" className="flex items-center gap-1.5 text-xs py-2">
+              <TabsTrigger value="goed" className="flex items-center gap-1.5 text-[13px] py-2.5">
                 {methodIcons.goed}
-                <span>Goed/pt</span>
+                <span>Goed per punt</span>
               </TabsTrigger>
-            </TabsList>
-            <TabsList className="grid grid-cols-1 gap-1 h-auto mt-1">
-              <TabsTrigger value="fixed-cutoff" className="flex items-center gap-1.5 text-xs py-2">
+              <TabsTrigger value="fixed-cutoff" className="flex items-center gap-1.5 text-[13px] py-2.5 col-span-2">
                 {methodIcons["fixed-cutoff"]}
-                <span>Punten Cesuur</span>
+                <span>Cesuur in punten</span>
               </TabsTrigger>
             </TabsList>
 
-            {/* Method-specific controls */}
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              {methodTypeLabel[config.method]}
+            </p>
+
             <TabsContent value="n-term">
               <MethodControl
                 label="N-waarde"
@@ -149,40 +154,42 @@ export function Sidebar({ config, onConfigChange }: SidebarProps) {
 
             <TabsContent value="percentage">
               <MethodControl
-                label="Cesuur percentage"
+                label="Cesuur (%)"
                 description={getMethodDescription("percentage")}
                 value={config.passPercentage}
                 onChange={(v) => onConfigChange({ passPercentage: v })}
                 min={0}
                 max={100}
-                step={1}
+                step={0.1}
                 unit="%"
               />
             </TabsContent>
 
             <TabsContent value="fouten">
               <MethodControl
-                label="K-factor (fouten)"
+                label="Fouten per punt (K)"
                 description={getMethodDescription("fouten")}
                 value={config.foutenKFactor}
                 onChange={(v) => onConfigChange({ foutenKFactor: v })}
-                min={0.1}
+                min={1}
                 max={20}
-                step={0.1}
+                step={1}
                 unit=""
+                integerOnly
               />
             </TabsContent>
 
             <TabsContent value="goed">
               <MethodControl
-                label="K-factor (goed)"
+                label="Goede antwoorden per punt (K)"
                 description={getMethodDescription("goed")}
                 value={config.goedKFactor}
                 onChange={(v) => onConfigChange({ goedKFactor: v })}
-                min={0.1}
+                min={1}
                 max={20}
-                step={0.1}
+                step={1}
                 unit=""
+                integerOnly
               />
             </TabsContent>
 
@@ -194,20 +201,18 @@ export function Sidebar({ config, onConfigChange }: SidebarProps) {
                 onChange={(v) => onConfigChange({ fixedCutoff: v })}
                 min={0}
                 max={config.totalPoints}
-                step={0.5}
-                unit="pt"
+                step={0.1}
+                unit=" punten"
               />
             </TabsContent>
           </Tabs>
         </div>
 
-        {/* Divider */}
         <div className="h-px bg-border" />
 
-        {/* Rounding */}
         <div className="space-y-3">
           <Label className="text-xs uppercase tracking-wide text-muted-foreground">
-            Afronding
+            Afronden op
           </Label>
           <ToggleGroup
             type="single"
@@ -244,6 +249,7 @@ interface MethodControlProps {
   max: number;
   step: number;
   unit: string;
+  integerOnly?: boolean;
 }
 
 function MethodControl({
@@ -255,9 +261,10 @@ function MethodControl({
   max,
   step,
   unit,
+  integerOnly = false,
 }: MethodControlProps) {
   return (
-    <div className="space-y-4 p-4 bg-muted/50 rounded-xl">
+    <div className="space-y-4 p-4 bg-muted/55 rounded-xl border border-border/60 transition-all duration-200 hover:border-primary/30">
       <p className="text-xs text-muted-foreground font-mono">{description}</p>
 
       <div className="space-y-3">
@@ -273,7 +280,8 @@ function MethodControl({
               onChange={(e) => {
                 const num = parseFloat(e.target.value);
                 if (!isNaN(num)) {
-                  onChange(Math.min(max, Math.max(min, num)));
+                  const normalized = integerOnly ? Math.round(num) : num;
+                  onChange(Math.min(max, Math.max(min, normalized)));
                 }
               }}
               className="w-20 h-8 text-sm text-center"
