@@ -4,6 +4,8 @@ Nummers is a desktop-first grading and normering app for Dutch teachers, built w
 
 The product UI is Dutch by design. Repository docs and developer-facing text are English.
 
+Access the webhosted version of the app at [https://numbers.pages.dev](https://nummers.pages.dev/).
+
 ## Features
 
 - Five grading methods:
