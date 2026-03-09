@@ -1,6 +1,6 @@
 [package]
 name = "cijfer-calculator"
-version = "1.1.0"
+version = "1.1.1"
 description = "Nummers desktop grading and normering tool"
 authors = ["you"]
 license = ""

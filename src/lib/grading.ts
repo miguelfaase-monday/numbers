@@ -160,13 +160,16 @@ export function calculateGrade(score: number, config: GradingConfig): number {
 /**
  * Generate all grade results for the table
  */
-export function generateGradeTable(config: GradingConfig): GradeResult[] {
+export function generateGradeTable(
+  config: GradingConfig,
+  includeHalfPoints = false
+): GradeResult[] {
   const results: GradeResult[] = [];
   const { totalPoints, voldoende, rounding } = config;
 
   // Handle fractional total points
   const hasHalfPoints = totalPoints % 1 !== 0;
-  const step = hasHalfPoints ? 0.5 : 1;
+  const step = includeHalfPoints || hasHalfPoints ? 0.5 : 1;
 
   for (let punten = totalPoints; punten >= 0; punten -= step) {
     const fouten = totalPoints - punten;

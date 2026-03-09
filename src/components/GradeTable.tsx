@@ -3,6 +3,7 @@ import { Table, Check, FileSpreadsheet, FileText, FileType2, Clipboard } from "l
 import { Button } from "@/components/ui/button";
 import { GradingConfig, generateGradeTable, tableToTSV, getMethodDisplayName } from "@/lib/grading";
 import { formatGrade, cn } from "@/lib/utils";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
   exportGradeTableCsv,
   exportGradeTablePdf,
@@ -16,7 +17,14 @@ interface GradeTableProps {
 export function GradeTable({ config }: GradeTableProps) {
   const [copied, setCopied] = useState(false);
   const [lastExport, setLastExport] = useState<"csv" | "xlsx" | "pdf" | null>(null);
-  const gradeResults = useMemo(() => generateGradeTable(config), [config]);
+  const [showHalfPoints, setShowHalfPoints] = useLocalStorage<boolean>(
+    "nummers-table-half-points",
+    false
+  );
+  const gradeResults = useMemo(
+    () => generateGradeTable(config, showHalfPoints),
+    [config, showHalfPoints]
+  );
 
   const handleCopy = async () => {
     const tsv = tableToTSV(gradeResults, config);
@@ -88,27 +96,38 @@ export function GradeTable({ config }: GradeTableProps) {
             </Button>
           </div>
         </div>
-        <div className="mt-2 flex items-center justify-between">
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
           <p className="text-[11px] text-muted-foreground">
             Exporteer dit overzicht als bestand voor delen of archiveren.
           </p>
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {copied ? (
-              <>
-                <Check className="w-3.5 h-3.5" />
-                Gekopieerd
-              </>
-            ) : (
-              <>
-                <Clipboard className="w-3.5 h-3.5" />
-                Kopieer (fallback)
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant={showHalfPoints ? "secondary" : "outline"}
+              size="sm"
+              onClick={() => setShowHalfPoints((prev) => !prev)}
+              className="h-7 px-2 text-[11px]"
+            >
+              Halve punten: {showHalfPoints ? "aan" : "uit"}
+            </Button>
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-3.5 h-3.5" />
+                  Gekopieerd
+                </>
+              ) : (
+                <>
+                  <Clipboard className="w-3.5 h-3.5" />
+                  Kopieer (fallback)
+                </>
+              )}
+            </button>
+          </div>
         </div>
         {lastExport && (
           <p className="mt-2 text-[11px] text-muted-foreground">
